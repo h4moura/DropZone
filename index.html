@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DropZone | Official Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9f9f9;
+            scroll-behavior: smooth;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+        }
+
+        .hidden-section {
+            display: none !important;
+        }
+
+        .sidebar-link.active {
+            background-color: #f97316;
+            color: white;
+        }
+
+        /* Animação suave */
+        .fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body class="text-zinc-900">
+
+    <script>
+        // ================= CONFIGURAÇÃO =================
+        // ⚠️ COLE SUAS CHAVES AQUI:
+        const SUPABASE_URL = 'https://bacbtymzqznaviaraict.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_fHAGfpdLEiXoWxs9UbX59g_o2CuBJK6';
+        const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // ================================================
+    </script>
+
+    <nav id="client-nav" class="glass border-b border-zinc-200 py-4 sticky top-0 z-40">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <h1 class="text-2xl font-black italic tracking-tighter cursor-pointer" onclick="app.view('shop')">
+                DROP<span class="text-orange-500">ZONE</span>
+            </h1>
+
+            <div class="hidden md:flex flex-1 max-w-md mx-8 relative">
+                <input type="text" id="shop-search" oninput="app.filterProducts()" placeholder="Buscar sneaker..."
+                    class="w-full bg-zinc-100 border-none rounded-full py-2 px-4 pl-10 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
+                <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-zinc-400"></i>
+            </div>
+
+            <div class="relative cursor-pointer hover:scale-105 transition" onclick="app.toggleCart(true)">
+                <span id="cart-count"
+                    class="absolute -top-1 -right-1 bg-orange-600 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">0</span>
+                <i data-lucide="shopping-bag" class="w-6 h-6 text-zinc-800"></i>
+            </div>
+        </div>
+        <div class="md:hidden px-4 mt-3">
+            <input type="text" id="shop-search-mobile" oninput="app.filterProducts()" placeholder="Buscar..."
+                class="w-full bg-zinc-100 rounded-lg p-2 text-sm">
+        </div>
+    </nav>
+
+    <div id="side-cart"
+        class="fixed top-0 right-0 h-full w-full md:w-[450px] bg-white shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col">
+        <div class="p-6 border-b flex justify-between items-center bg-zinc-50">
+            <h2 class="text-xl font-black uppercase italic">Sua Bag</h2>
+            <button onclick="app.toggleCart(false)"><i data-lucide="x" class="w-6 h-6"></i></button>
+        </div>
+        <div id="cart-list" class="flex-grow overflow-y-auto p-6 space-y-4"></div>
+        <div class="p-6 border-t bg-white">
+            <div class="flex justify-between text-xl font-black mb-4">
+                <span>TOTAL</span>
+                <span id="cart-total" class="text-orange-600">R$ 0,00</span>
+            </div>
+            <button onclick="app.goToCheckoutForm()"
+                class="w-full bg-black text-white py-4 rounded-xl font-black uppercase hover:bg-zinc-800 transition">Finalizar
+                Compra</button>
+        </div>
+    </div>
+
+    <section id="view-shop" class="fade-in">
+        <div class="relative bg-zinc-900 h-[400px] flex items-center justify-center text-center overflow-hidden mb-10">
+            <img src="https://images.unsplash.com/photo-1552346154-21d32810aba3?q=80&w=1920&auto=format&fit=crop"
+                class="absolute inset-0 w-full h-full object-cover opacity-40">
+            <div class="relative z-10 px-4">
+                <span class="text-orange-500 font-bold tracking-[0.3em] text-xs uppercase mb-2 block">Coleção
+                    Oficial</span>
+                <h2 class="text-5xl md:text-7xl font-black text-white italic tracking-tighter mb-6">WALK LIKE <br>A
+                    <span class="text-orange-500">LEGEND.</span></h2>
+                <button onclick="document.getElementById('product-grid').scrollIntoView()"
+                    class="bg-white text-black px-8 py-3 rounded-full font-black text-xs uppercase tracking-widest hover:scale-105 transition">Ver
+                    Produtos</button>
+            </div>
+        </div>
+
+        <main class="container mx-auto px-4 pb-20">
+            <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            </div>
+        </main>
+
+        <footer class="bg-white border-t py-8 text-center text-zinc-400 text-sm">
+            <p>&copy; 2024 DropZone Inc. Todos os direitos reservados.</p>
+            <a href="#admin" onclick="app.checkHash()"
+                class="opacity-10 hover:opacity-100 transition mt-2 block text-xs">Acesso Restrito</a>
+        </footer>
+    </section>
+
+    <section id="view-checkout" class="hidden-section container mx-auto py-10 px-4 fade-in">
+        <div class="max-w-3xl mx-auto bg-white p-8 md:p-12 rounded-[2rem] shadow-xl border border-zinc-100">
+            <button onclick="app.view('shop')"
+                class="text-sm font-bold text-zinc-400 hover:text-black mb-6 flex items-center"><i
+                    data-lucide="arrow-left" class="w-4 h-4 mr-2"></i> Voltar a Loja</button>
+
+            <h2 class="text-3xl font-black uppercase italic mb-2">Finalizar Pedido</h2>
+            <p class="text-zinc-500 mb-8">Preencha seus dados para que nossa equipe entre em contato.</p>
+
+            <form onsubmit="app.submitOrder(event)" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-zinc-500 mb-1">Nome Completo</label>
+                        <input required id="cx-name"
+                            class="w-full p-3 bg-zinc-50 border border-zinc-200 rounded-lg focus:border-orange-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-zinc-500 mb-1">Telefone / WhatsApp</label>
+                        <input required id="cx-phone" placeholder="(11) 99999-9999"
+                            class="w-full p-3 bg-zinc-50 border border-zinc-200 rounded-lg focus:border-orange-500 outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase text-zinc-500 mb-1">Endereço de Entrega</label>
+                    <input required id="cx-address" placeholder="Rua, Número, Bairro"
+                        class="w-full p-3 bg-zinc-50 border border-zinc-200 rounded-lg focus:border-orange-500 outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-zinc-500 mb-1">Cidade</label>
+                        <input required id="cx-city"
+                            class="w-full p-3 bg-zinc-50 border border-zinc-200 rounded-lg outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-zinc-500 mb-1">Estado</label>
+                        <input required id="cx-state" placeholder="SP"
+                            class="w-full p-3 bg-zinc-50 border border-zinc-200 rounded-lg outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase text-zinc-500 mb-2">Forma de Pagamento</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="payment" value="PIX" class="peer sr-only" checked>
+                            <div
+                                class="p-4 border-2 rounded-xl text-center peer-checked:border-orange-500 peer-checked:text-orange-600 peer-checked:bg-orange-50 transition">
+                                <span class="font-black">PIX (5% OFF)</span>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="payment" value="BOLETO" class="peer sr-only">
+                            <div
+                                class="p-4 border-2 rounded-xl text-center peer-checked:border-orange-500 peer-checked:text-orange-600 peer-checked:bg-orange-50 transition">
+                                <span class="font-black">BOLETO</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="bg-zinc-50 p-6 rounded-xl mt-6">
+                    <div class="flex justify-between text-lg font-bold text-zinc-500">
+                        <span>Itens</span>
+                        <span id="cx-summary-qty">0</span>
+                    </div>
+                    <div class="flex justify-between text-3xl font-black mt-2">
+                        <span>Total</span>
+                        <span id="cx-summary-total">R$ 0,00</span>
+                    </div>
+                </div>
+
+                <button type="submit"
+                    class="w-full bg-green-600 text-white py-5 rounded-xl font-black text-lg hover:bg-green-700 transition shadow-lg">CONFIRMAR
+                    PEDIDO</button>
+            </form>
+        </div>
+    </section>
+
+    <section id="view-admin-login"
+        class="hidden-section w-full h-screen fixed inset-0 bg-zinc-900 flex items-center justify-center z-[60] fade-in">
+        <div class="bg-white p-10 rounded-2xl w-full max-w-sm shadow-2xl relative">
+            <button onclick="app.view('shop')" class="absolute top-4 right-4 text-zinc-400 hover:text-black"><i
+                    data-lucide="x"></i></button>
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-black italic">ADMIN <span class="text-orange-500">PANEL</span></h2>
+                <p class="text-xs text-zinc-400 mt-2">Acesso restrito a colaboradores</p>
+            </div>
+            <form onsubmit="admin.login(event)">
+                <div class="space-y-4">
+                    <input type="text" id="login-user" placeholder="Login"
+                        class="w-full p-3 bg-zinc-50 border rounded-lg outline-none focus:border-orange-500">
+                    <input type="password" id="login-pass" placeholder="Senha"
+                        class="w-full p-3 bg-zinc-50 border rounded-lg outline-none focus:border-orange-500">
+                </div>
+                <button type="submit"
+                    class="w-full bg-black text-white py-3 rounded-lg font-black mt-6 hover:bg-orange-600 transition">ENTRAR</button>
+            </form>
+        </div>
+    </section>
+
+    <section id="view-admin-panel" class="hidden-section min-h-screen bg-zinc-100 flex flex-col md:flex-row">
+
+        <aside
+            class="w-full md:w-64 bg-zinc-900 text-white flex-shrink-0 flex flex-col h-auto md:h-screen sticky top-0 z-50">
+            <div class="p-6 border-b border-zinc-800 flex justify-between items-center">
+                <h2 class="text-xl font-black italic">DZ <span class="text-orange-500">ADMIN</span></h2>
+                <button onclick="app.view('shop')" class="md:hidden text-zinc-400"><i data-lucide="x"></i></button>
+            </div>
+            <div class="p-4 flex-grow space-y-2">
+                <button onclick="admin.tab('products')" id="tab-btn-products"
+                    class="sidebar-link w-full text-left p-3 rounded-lg font-bold text-sm hover:bg-zinc-800 flex items-center"><i
+                        data-lucide="package" class="mr-3 w-4 h-4"></i> Produtos</button>
+                <button onclick="admin.tab('pending')" id="tab-btn-pending"
+                    class="sidebar-link w-full text-left p-3 rounded-lg font-bold text-sm hover:bg-zinc-800 flex items-center"><i
+                        data-lucide="clock" class="mr-3 w-4 h-4"></i> Pedidos Pendentes</button>
+                <button onclick="admin.tab('concluded')" id="tab-btn-concluded"
+                    class="sidebar-link w-full text-left p-3 rounded-lg font-bold text-sm hover:bg-zinc-800 flex items-center"><i
+                        data-lucide="check-circle" class="mr-3 w-4 h-4"></i> Pedidos Concluídos</button>
+                <button onclick="admin.tab('users')" id="tab-btn-users"
+                    class="sidebar-link w-full text-left p-3 rounded-lg font-bold text-sm hover:bg-zinc-800 flex items-center"><i
+                        data-lucide="users" class="mr-3 w-4 h-4"></i> Usuários</button>
+            </div>
+            <div class="p-4 bg-zinc-950">
+                <div class="text-xs text-zinc-500 mb-2 font-bold uppercase">Logado como:</div>
+                <div id="admin-current-user" class="font-bold text-sm text-white mb-2">...</div>
+                <button onclick="location.reload()"
+                    class="text-red-500 text-xs font-bold hover:text-red-400 flex items-center"><i data-lucide="log-out"
+                        class="w-3 h-3 mr-1"></i> Sair</button>
+            </div>
+        </aside>
+
+        <main class="flex-grow p-6 md:p-10 overflow-y-auto">
+
+            <div id="tab-products" class="admin-tab hidden-section">
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-3xl font-black text-zinc-800">Catálogo</h2>
+                    <button onclick="document.getElementById('modal-add-prod').classList.remove('hidden-section')"
+                        class="bg-orange-500 text-white px-4 py-2 rounded-lg font-bold text-sm shadow hover:bg-orange-600 flex items-center"><i
+                            data-lucide="plus" class="w-4 h-4 mr-2"></i> Novo Produto</button>
+                </div>
+                <div id="admin-prod-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            </div>
+
+            <div id="tab-pending" class="admin-tab hidden-section">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+                    <h2 class="text-3xl font-black text-zinc-800">Pedidos Pendentes</h2>
+                    <input type="text" oninput="admin.renderOrders('Pendente', this.value)"
+                        placeholder="Buscar cliente..."
+                        class="bg-white p-2 px-4 rounded-lg border border-zinc-300 text-sm w-full md:w-64">
+                </div>
+                <div id="list-pending" class="space-y-4"></div>
+            </div>
+
+            <div id="tab-concluded" class="admin-tab hidden-section">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+                    <h2 class="text-3xl font-black text-zinc-800">Histórico Concluído</h2>
+                    <input type="text" oninput="admin.renderOrders('Concluido', this.value)"
+                        placeholder="Buscar cliente..."
+                        class="bg-white p-2 px-4 rounded-lg border border-zinc-300 text-sm w-full md:w-64">
+                </div>
+                <div id="list-concluded" class="space-y-4 opacity-75"></div>
+            </div>
+
+            <div id="tab-users" class="admin-tab hidden-section">
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-3xl font-black text-zinc-800">Gestão de Acesso</h2>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-zinc-200 mb-8 max-w-2xl">
+                    <h3 class="font-bold mb-4 flex items-center"><i data-lucide="user-plus" class="w-4 h-4 mr-2"></i>
+                        Cadastrar Novo Usuário</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <input id="new-u-name" placeholder="Nome" class="p-2 border rounded text-sm">
+                        <input id="new-u-login" placeholder="Login" class="p-2 border rounded text-sm">
+                        <input id="new-u-pass" type="password" placeholder="Senha" class="p-2 border rounded text-sm">
+                        <select id="new-u-role" class="p-2 border rounded text-sm bg-white">
+                            <option value="Visualizador">Visualizador</option>
+                            <option value="Editor">Editor</option>
+                            <option value="Admin">Administrador</option>
+                        </select>
+                    </div>
+                    <button onclick="admin.createUser()"
+                        class="bg-zinc-900 text-white px-6 py-2 rounded-lg font-bold text-sm hover:bg-zinc-700">Criar
+                        Usuário</button>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-zinc-50 border-b">
+                            <tr>
+                                <th class="p-4">Nome</th>
+                                <th class="p-4">Login</th>
+                                <th class="p-4">Nível</th>
+                                <th class="p-4 text-right">Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-user-list"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </section>
+
+    <div id="modal-add-prod"
+        class="hidden-section fixed inset-0 bg-black/60 z-[70] flex items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-2xl w-full max-w-md shadow-2xl">
+            <h3 class="text-xl font-black mb-4">Novo Produto</h3>
+            <input id="np-name" placeholder="Nome do Produto"
+                class="w-full mb-3 p-3 border rounded-lg bg-zinc-50 text-sm">
+            <input id="np-brand" placeholder="Marca" class="w-full mb-3 p-3 border rounded-lg bg-zinc-50 text-sm">
+            <input id="np-price" type="number" placeholder="Preço (R$)"
+                class="w-full mb-3 p-3 border rounded-lg bg-zinc-50 text-sm">
+            <label class="block text-xs font-bold uppercase text-zinc-500 mb-1">Foto do Produto</label>
+            <input id="np-file" type="file" accept="image/*"
+                class="w-full mb-6 p-2 border rounded-lg bg-zinc-50 text-sm">
+            <div class="flex gap-3">
+                <button onclick="document.getElementById('modal-add-prod').classList.add('hidden-section')"
+                    class="flex-1 bg-zinc-200 py-3 rounded-lg font-bold text-sm">Cancelar</button>
+                <button onclick="admin.addProduct()"
+                    class="flex-1 bg-orange-500 text-white py-3 rounded-lg font-bold text-sm hover:bg-orange-600">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- ESTADO ---
+        let cart = [];
+        let products = [];
+        let orders = [];
+        let usersList = [];
+        let currentUserRole = '';
+
+        // --- APP CLIENTE ---
+        const app = {
+            init: async () => {
+                lucide.createIcons();
+                app.checkHash();
+                await app.fetchProducts();
+                window.onhashchange = app.checkHash;
+            },
+
+            checkHash: () => {
+                if (window.location.hash === '#admin') app.view('admin-login');
+            },
+
+            fetchProducts: async () => {
+                const { data, error } = await db.from('products').select('*').order('id', { ascending: false });
+                if (!error) {
+                    products = data;
+                    app.renderShop(products);
+                }
+            },
+
+            renderShop: (list) => {
+                const grid = document.getElementById('product-grid');
+                if (list.length === 0) {
+                    grid.innerHTML = '<p class="col-span-4 text-center py-10 text-zinc-400">Nenhum produto encontrado.</p>';
+                    return;
+                }
+                grid.innerHTML = list.map(p => `
+                    <div class="bg-white p-4 rounded-3xl border border-zinc-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition duration-300 group">
+                        <div class="h-52 bg-zinc-50 rounded-2xl flex items-center justify-center overflow-hidden mb-4 relative">
+                            <img src="${p.img}" class="w-full h-full object-contain p-4 group-hover:scale-110 transition duration-500">
+                        </div>
+                        <div class="px-2">
+                            <span class="text-[10px] font-black text-orange-500 uppercase tracking-widest">${p.brand}</span>
+                            <h3 class="font-bold text-lg leading-tight mb-3">${p.name}</h3>
+                            <div class="flex justify-between items-center">
+                                <span class="font-black text-xl">R$ ${p.price}</span>
+                                <button onclick="app.addToCart(${p.id})" class="bg-black text-white p-2.5 rounded-xl hover:bg-orange-500 transition shadow-lg shadow-black/10">
+                                    <i data-lucide="plus" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                lucide.createIcons();
+            },
+
+            filterProducts: () => {
+                const term1 = document.getElementById('shop-search').value.toLowerCase();
+                const term2 = document.getElementById('shop-search-mobile').value.toLowerCase();
+                const q = term1 || term2;
+
+                const filtered = products.filter(p => p.name.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q));
+                app.renderShop(filtered);
+            },
+
+            addToCart: (id) => {
+                const p = products.find(x => x.id === id);
+                cart.push(p);
+                app.updateCartUI();
+                app.toggleCart(true);
+            },
+
+            removeFromCart: (idx) => {
+                cart.splice(idx, 1);
+                app.updateCartUI();
+            },
+
+            updateCartUI: () => {
+                document.getElementById('cart-count').innerText = cart.length;
+                const total = cart.reduce((a, b) => a + b.price, 0);
+                document.getElementById('cart-total').innerText = `R$ ${total.toFixed(2)}`;
+                document.getElementById('cart-list').innerHTML = cart.map((i, idx) => `
+                    <div class="flex items-center gap-4 bg-zinc-50 p-3 rounded-xl border border-zinc-100">
+                        <img src="${i.img}" class="w-12 h-12 object-contain bg-white rounded-lg">
+                        <div class="flex-1">
+                            <p class="font-bold text-xs uppercase">${i.name}</p>
+                            <p class="text-orange-600 font-bold text-sm">R$ ${i.price}</p>
+                        </div>
+                        <button onclick="app.removeFromCart(${idx})" class="text-zinc-300 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </div>
+                `).join('');
+                lucide.createIcons();
+            },
+
+            toggleCart: (show) => {
+                const el = document.getElementById('side-cart');
+                show ? el.classList.remove('translate-x-full') : el.classList.add('translate-x-full');
+            },
+
+            goToCheckoutForm: () => {
+                if (!cart.length) return alert("Adicione itens ao carrinho!");
+                app.toggleCart(false);
+                app.view('checkout');
+                // Preenche resumo
+                document.getElementById('cx-summary-qty').innerText = cart.length;
+                document.getElementById('cx-summary-total').innerText = document.getElementById('cart-total').innerText;
+            },
+
+            submitOrder: async (e) => {
+                e.preventDefault();
+                const form = {
+                    customer_name: document.getElementById('cx-name').value,
+                    phone: document.getElementById('cx-phone').value,
+                    address: document.getElementById('cx-address').value,
+                    city: document.getElementById('cx-city').value,
+                    state: document.getElementById('cx-state').value,
+                    payment_method: document.querySelector('input[name="payment"]:checked').value,
+                    items: cart,
+                    total: cart.reduce((a, b) => a + b.price, 0),
+                    status: 'Pendente'
+                };
+
+                const { error } = await db.from('orders').insert(form);
+                if (error) {
+                    alert('Erro ao enviar: ' + error.message);
+                } else {
+                    alert('PEDIDO ENVIADO! Nossa equipe entrará em contato em breve.');
+                    cart = [];
+                    app.updateCartUI();
+                    app.view('shop');
+                    e.target.reset();
+                }
+            },
+
+            view: (id) => {
+                document.querySelectorAll('section').forEach(s => s.classList.add('hidden-section'));
+                document.getElementById('client-nav').classList.remove('hidden-section');
+
+                if (id.includes('admin')) document.getElementById('client-nav').classList.add('hidden-section');
+
+                document.getElementById(`view-${id}`).classList.remove('hidden-section');
+                window.scrollTo(0, 0);
+            }
+        };
+
+        // --- ADMIN SYSTEM ---
+        const admin = {
+            login: async (e) => {
+                e.preventDefault();
+                const u = document.getElementById('login-user').value;
+                const p = document.getElementById('login-pass').value;
+
+                // Busca no DB
+                const { data, error } = await db.from('users').select('*').eq('login', u).eq('password', p).single();
+
+                if (error || !data) {
+                    alert("Dados incorretos.");
+                } else {
+                    currentUserRole = data.role;
+                    document.getElementById('admin-current-user').innerText = `${data.name} (${data.role})`;
+                    app.view('admin-panel');
+                    admin.tab('products'); // Inicia na aba produtos
+                }
+            },
+
+            tab: (name) => {
+                document.querySelectorAll('.admin-tab').forEach(t => t.classList.add('hidden-section'));
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+
+                document.getElementById(`tab-${name}`).classList.remove('hidden-section');
+                document.getElementById(`tab-btn-${name}`).classList.add('active');
+
+                if (name === 'products') admin.loadProducts();
+                if (name === 'pending') admin.fetchOrders('Pendente');
+                if (name === 'concluded') admin.fetchOrders('Concluido');
+                if (name === 'users') admin.fetchUsers();
+            },
+
+            loadProducts: async () => {
+                // Reutiliza o fetch público
+                await app.fetchProducts();
+                const list = document.getElementById('admin-prod-list');
+                list.innerHTML = products.map(p => `
+                    <div class="bg-white p-4 rounded-xl border flex items-center gap-4">
+                        <img src="${p.img}" class="w-16 h-16 object-contain">
+                        <div class="flex-grow">
+                            <p class="font-bold text-sm">${p.name}</p>
+                            <p class="text-xs text-zinc-500">${p.brand} | R$ ${p.price}</p>
+                        </div>
+                        ${currentUserRole !== 'Visualizador' ?
+                        `<button onclick="admin.deleteProduct(${p.id})" class="text-red-500 hover:bg-red-50 p-2 rounded"><i data-lucide="trash-2" class="w-4 h-4"></i></button>`
+                        : ''}
+                    </div>
+                `).join('');
+                lucide.createIcons();
+            },
+
+            addProduct: async () => {
+                if (currentUserRole === 'Visualizador') return alert("Sem permissão.");
+
+                const name = document.getElementById('np-name').value;
+                const brand = document.getElementById('np-brand').value;
+                const price = parseFloat(document.getElementById('np-price').value);
+                const fileInput = document.getElementById('np-file');
+                const file = fileInput.files[0];
+
+                if (!name || !price || !file) {
+                    return alert("Preencha todos os campos e selecione uma imagem!");
+                }
+
+                try {
+                    const fileExt = file.name.split('.').pop();
+                    const fileName = `${Math.random()}.${fileExt}`;
+                    const filePath = `${fileName}`;
+
+                    let { error: uploadError } = await db.storage
+                        .from('images')
+                        .upload(filePath, file);
+
+                    if (uploadError) throw uploadError;
+
+                    const { data: publicUrlData } = db.storage
+                        .from('images')
+                        .getPublicUrl(filePath);
+
+                    const imgUrl = publicUrlData.publicUrl;
+
+                    const { error: dbError } = await db.from('products').insert({
+                        name,
+                        brand,
+                        price,
+                        img: imgUrl
+                    });
+
+                    if (dbError) throw dbError;
+
+                    alert("Produto cadastrado com sucesso!");
+                    document.getElementById('modal-add-prod').classList.add('hidden-section');
+                    admin.loadProducts();
+
+                    document.getElementById('np-name').value = '';
+                    document.getElementById('np-brand').value = '';
+                    document.getElementById('np-price').value = '';
+                    fileInput.value = '';
+
+                } catch (error) {
+                    console.error('Erro detalhado:', error);
+                    alert("Erro ao salvar produto: " + error.message);
+                }
+            },
+
+            deleteProduct: async (id) => {
+                if (!confirm("Excluir item?")) return;
+                await db.from('products').delete().eq('id', id);
+                admin.loadProducts();
+            },
+
+            fetchOrders: async (status) => {
+                const { data } = await db.from('orders').select('*').eq('status', status).order('created_at', { ascending: false });
+                orders = data || [];
+                admin.renderOrders(status, '');
+            },
+
+            renderOrders: (status, filterText) => {
+                const container = status === 'Pendente' ? 'list-pending' : 'list-concluded';
+                const filtered = orders.filter(o => o.customer_name.toLowerCase().includes(filterText.toLowerCase()));
+
+                const html = filtered.map(o => `
+                    <div class="bg-white p-6 rounded-xl border border-zinc-200 shadow-sm">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h4 class="font-black text-lg">${o.customer_name}</h4>
+                                <p class="text-sm text-zinc-500 flex items-center"><i data-lucide="phone" class="w-3 h-3 mr-1"></i> ${o.phone}</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="block font-black text-orange-600">R$ ${o.total}</span>
+                                <span class="text-xs font-bold uppercase bg-zinc-100 px-2 py-1 rounded text-zinc-600">${o.payment_method}</span>
+                            </div>
+                        </div>
+                        <div class="bg-zinc-50 p-3 rounded-lg text-xs text-zinc-600 mb-4">
+                            <p><strong>Endereço:</strong> ${o.address}, ${o.city} - ${o.state}</p>
+                            <p class="mt-1"><strong>Itens:</strong> ${o.items.map(i => i.name).join(', ')}</p>
+                        </div>
+                        ${status === 'Pendente' && currentUserRole !== 'Visualizador' ?
+                        `<button onclick="admin.concludeOrder(${o.id})" class="w-full bg-green-600 text-white py-2 rounded-lg font-bold text-sm hover:bg-green-700 flex items-center justify-center"><i data-lucide="check" class="w-4 h-4 mr-2"></i> CONCLUIR PEDIDO</button>`
+                        : ''}
+                    </div>
+                `).join('');
+
+                document.getElementById(container).innerHTML = html || '<p class="text-zinc-400 italic">Nenhum pedido encontrado.</p>';
+                lucide.createIcons();
+            },
+
+            concludeOrder: async (id) => {
+                if (!confirm("Marcar como entregue/finalizado?")) return;
+                await db.from('orders').update({ status: 'Concluido' }).eq('id', id);
+                admin.fetchOrders('Pendente'); // Recarrega
+            },
+
+            fetchUsers: async () => {
+                const { data } = await db.from('users').select('*').order('id');
+                usersList = data;
+                const tbody = document.getElementById('admin-user-list');
+                tbody.innerHTML = data.map(u => `
+                    <tr class="border-b last:border-0 hover:bg-zinc-50">
+                        <td class="p-4 font-bold">${u.name}</td>
+                        <td class="p-4 text-zinc-500">${u.login}</td>
+                        <td class="p-4"><span class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-black uppercase">${u.role}</span></td>
+                        <td class="p-4 text-right">
+                            ${currentUserRole === 'Admin' && u.login !== 'admin' ?
+                        `<button onclick="admin.deleteUser(${u.id})" class="text-red-400 hover:text-red-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>`
+                        : ''}
+                        </td>
+                    </tr>
+                `).join('');
+                lucide.createIcons();
+            },
+
+            createUser: async () => {
+                if (currentUserRole !== 'Admin') return alert("Apenas Administradores criam usuários.");
+                const form = {
+                    name: document.getElementById('new-u-name').value,
+                    login: document.getElementById('new-u-login').value,
+                    password: document.getElementById('new-u-pass').value,
+                    role: document.getElementById('new-u-role').value
+                };
+                if (!form.name || !form.password) return alert("Preencha tudo");
+
+                const { error } = await db.from('users').insert(form);
+                if (error) alert("Erro (talvez login já exista): " + error.message);
+                else {
+                    alert("Usuário Criado!");
+                    admin.fetchUsers();
+                }
+            },
+
+            deleteUser: async (id) => {
+                if (!confirm("Remover usuário?")) return;
+                await db.from('users').delete().eq('id', id);
+                admin.fetchUsers();
+            }
+        };
+
+        // Start
+        window.onload = app.init;
+    </script>
+</body>
+
+</html>
