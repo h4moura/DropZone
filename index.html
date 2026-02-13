@@ -1,133 +1,48 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DropZone | Workflow Logística</title>
+    <title>Devae | Soluções Digitais</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-
+    
     <style>
-        /* --- VARIAVEIS DE CORES --- */
+        /* --- IDENTIDADE VISUAL DEVAE (TECH) --- */
         :root {
-            --primary: #f97316;
-            /* Laranja */
-            --primary-hover: #ea580c;
-            --dark: #18181b;
-            /* Preto */
-            --light: #f4f4f5;
-            /* Cinza Claro */
-            --status-proc: #3b82f6;
-            /* Azul */
-            --status-conf: #8b5cf6;
-            /* Roxo */
-            --status-env: #f59e0b;
-            /* Amarelo */
-            --status-ok: #10b981;
-            /* Verde */
+            --primary: #00b2ff;      /* Ciano Vibrante */
+            --primary-dark: #0090cc;
+            --bg-deep: #000820;      /* Azul Profundo */
+            --bg-light: #f8fafc;     /* Branco Gelo */
+            --text-main: #0f172a;
         }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--light);
-            scroll-behavior: smooth;
-        }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-light); color: var(--text-main); scroll-behavior: smooth; }
+        
+        .text-primary { color: var(--primary); }
+        .bg-primary { background-color: var(--primary); }
+        .bg-deep { background-color: var(--bg-deep); }
+        .text-deep { color: var(--bg-deep); }
+        
+        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px); border-bottom: 1px solid #e2e8f0; }
+        .hidden-section { display: none !important; }
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .text-primary {
-            color: var(--primary);
-        }
-
-        .bg-primary {
-            background-color: var(--primary);
-        }
-
-        .glass {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(8px);
-        }
-
-        .hidden-section {
-            display: none !important;
-        }
-
-        .fade-in {
-            animation: fadeIn 0.4s ease-out forwards;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Popup */
-        .swal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .swal-modal {
-            background: white;
-            padding: 2rem;
-            border-radius: 1.5rem;
-            max-width: 400px;
-            width: 90%;
-            text-align: center;
-            animation: popIn 0.3s;
-        }
-
-        @keyframes popIn {
-            from {
-                transform: scale(0.8);
-                opacity: 0;
-            }
-
-            to {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
-        /* Stepper do Admin */
-        .step-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #e4e4e7;
-        }
-
-        .step-active {
-            background: var(--primary);
-            transform: scale(1.2);
-        }
-
-        .step-line {
-            flex: 1;
-            height: 2px;
-            background: #e4e4e7;
-        }
-
-        .step-line-active {
-            background: var(--primary);
-        }
+        /* Stepper & UI Elements */
+        .step-dot { width: 12px; height: 12px; border-radius: 50%; background: #cbd5e1; transition: all 0.3s; }
+        .step-active { background: var(--primary); box-shadow: 0 0 0 4px rgba(0, 178, 255, 0.2); }
+        .step-line { flex: 1; height: 3px; background: #cbd5e1; margin: 0 4px; }
+        .step-line-active { background: var(--primary); }
+        
+        /* Modal Overlay */
+        .swal-overlay { position: fixed; inset: 0; background: rgba(0,8,32,0.9); z-index: 100; display: flex; align-items: center; justify-content: center; }
+        .swal-modal { background: white; padding: 2rem; border-radius: 1.5rem; max-width: 400px; width: 90%; text-align: center; animation: popIn 0.3s; }
     </style>
 </head>
-
-<body class="text-zinc-900">
+<body>
 
     <script>
         // ================= CONFIGURAÇÃO =================
@@ -137,75 +52,81 @@
         // ================================================
     </script>
 
-    <nav id="client-nav" class="glass border-b border-zinc-200 py-4 sticky top-0 z-40">
-        <div class="container mx-auto px-4 flex justify-between items-center">
-            <h1 class="text-2xl font-black italic tracking-tighter cursor-pointer" onclick="app.view('shop')">
-                DROP<span class="text-primary">ZONE</span>
+    <nav id="client-nav" class="glass sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-black tracking-tighter cursor-pointer flex items-center gap-1" onclick="app.view('shop')">
+                <div class="w-3 h-3 bg-primary rounded-full"></div>
+                <span class="text-deep">DEVAE</span>
             </h1>
-
+            
             <div class="hidden md:flex flex-1 max-w-md mx-8 relative">
-                <input type="text" id="shop-search" oninput="app.filterProducts()" placeholder="Buscar sneaker..."
-                    class="w-full bg-zinc-100 border-none rounded-full py-2 px-4 pl-10 text-sm outline-none focus:ring-2 focus:ring-orange-500">
-                <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-zinc-400"></i>
+                <input type="text" id="shop-search" oninput="app.filterProducts()" placeholder="Buscar serviços ou sistemas..." class="w-full bg-slate-100 border-none rounded-full py-2 px-4 pl-10 text-sm outline-none focus:ring-2 focus:ring-[#00b2ff]">
+                <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-slate-400"></i>
             </div>
 
             <div class="flex items-center gap-6">
-                <div class="flex items-center gap-2 cursor-pointer hover:text-primary transition"
-                    onclick="auth.handleUserClick()">
+                <div class="flex items-center gap-2 cursor-pointer hover:text-primary transition" onclick="auth.handleUserClick()">
                     <div class="text-right hidden md:block leading-tight">
-                        <p id="nav-user-name" class="text-xs font-bold">Visitante</p>
-                        <p class="text-[10px] text-zinc-400 uppercase">Minha Conta</p>
+                        <p id="nav-user-name" class="text-xs font-bold text-deep">Visitante</p>
+                        <p class="text-[10px] text-slate-400 uppercase">Minha Conta</p>
                     </div>
-                    <div class="bg-zinc-100 p-2 rounded-full"><i data-lucide="user" class="w-5 h-5"></i></div>
+                    <div class="bg-slate-100 p-2 rounded-full text-deep"><i data-lucide="user" class="w-5 h-5"></i></div>
                 </div>
                 <div class="relative cursor-pointer hover:scale-105 transition" onclick="app.toggleCart(true)">
-                    <span id="cart-count"
-                        class="absolute -top-1 -right-1 bg-primary text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">0</span>
-                    <i data-lucide="shopping-bag" class="w-6 h-6 text-zinc-800"></i>
+                    <span id="cart-count" class="absolute -top-1 -right-1 bg-primary text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">0</span>
+                    <i data-lucide="shopping-bag" class="w-6 h-6 text-deep"></i>
                 </div>
             </div>
         </div>
-        <div class="md:hidden px-4 mt-3">
-            <input type="text" id="shop-search-mobile" oninput="app.filterProducts()" placeholder="Buscar..."
-                class="w-full bg-zinc-100 rounded-lg p-2 text-sm">
+        <div class="md:hidden px-4 pb-3">
+            <input type="text" id="shop-search-mobile" oninput="app.filterProducts()" placeholder="Buscar serviços..." class="w-full bg-slate-100 rounded-lg p-2 text-sm outline-none">
         </div>
     </nav>
 
-    <div id="side-cart"
-        class="fixed top-0 right-0 h-full w-full md:w-[450px] bg-white shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col">
-        <div class="p-6 border-b flex justify-between items-center bg-zinc-50">
-            <h2 class="text-xl font-black uppercase italic">Sua Bag</h2>
+    <div id="side-cart" class="fixed top-0 right-0 h-full w-full md:w-[450px] bg-white shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col">
+        <div class="p-6 border-b flex justify-between items-center bg-slate-50">
+            <h2 class="text-xl font-black uppercase text-deep">Contratação</h2>
             <button onclick="app.toggleCart(false)"><i data-lucide="x" class="w-6 h-6"></i></button>
         </div>
         <div id="cart-list" class="flex-grow overflow-y-auto p-6 space-y-4"></div>
         <div class="p-6 border-t bg-white">
-            <div class="flex justify-between text-xl font-black mb-4"><span>TOTAL</span><span id="cart-total"
-                    class="text-primary">R$ 0,00</span></div>
-            <button onclick="app.verifyCheckout()"
-                class="w-full bg-black text-white py-4 rounded-xl font-black uppercase hover:bg-zinc-800 transition">Finalizar
-                Compra</button>
+            <div class="flex justify-between text-xl font-black mb-4 text-deep"><span>TOTAL</span><span id="cart-total" class="text-primary">R$ 0,00</span></div>
+            <button onclick="app.verifyCheckout()" class="w-full bg-deep text-white py-4 rounded-xl font-bold uppercase hover:bg-slate-800 transition shadow-lg shadow-blue-500/20">Finalizar Pedido</button>
         </div>
     </div>
 
     <section id="view-shop" class="fade-in">
-        <div class="relative bg-zinc-900 h-[350px] flex items-center justify-center text-center overflow-hidden mb-10">
-            <div
-                class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1552346154-21d32810aba3')] bg-cover bg-center opacity-40">
-            </div>
-            <div class="relative z-10 px-4">
-                <span class="text-primary font-bold tracking-[0.3em] text-xs uppercase mb-2 block">Coleção
-                    Oficial</span>
-                <h2 class="text-5xl font-black text-white italic tracking-tighter mb-4">STYLE <span
-                        class="text-primary">UNLEASHED</span></h2>
+        <div class="relative bg-deep h-[450px] flex items-center justify-center text-center overflow-hidden mb-12">
+            <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b')] bg-cover bg-center opacity-20 mix-blend-overlay"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-[#000820] via-[#000820]/80 to-transparent"></div>
+            
+            <div class="relative z-10 px-4 max-w-4xl">
+                <span class="text-primary font-bold tracking-[0.3em] text-xs uppercase mb-4 block animate-pulse">Soluções & Performance</span>
+                <h2 class="text-4xl md:text-6xl font-black text-white tracking-tighter mb-6 leading-tight">
+                    TRANSFORMAÇÃO <span class="text-primary">DIGITAL</span>
+                </h2>
+                <p class="text-slate-300 text-sm md:text-lg max-w-2xl mx-auto font-light leading-relaxed">
+                    Desenvolvemos <b>Sistemas Web</b>, Sites Otimizados e gerenciamos suas <b>Mídias Sociais</b>. 
+                    A tecnologia certa para escalar o seu negócio.
+                </p>
+                <button onclick="document.getElementById('product-grid').scrollIntoView()" class="mt-8 bg-primary text-white px-8 py-3 rounded-full font-bold text-sm hover:bg-primary-dark transition shadow-[0_0_20px_rgba(0,178,255,0.4)]">
+                    Ver Serviços
+                </button>
             </div>
         </div>
+
         <main class="container mx-auto px-4 pb-20">
-            <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"></div>
+            <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
         </main>
-        <footer class="bg-white border-t py-10 text-center">
+        
+        <footer class="bg-white border-t py-12 text-center mt-10">
             <div class="container mx-auto px-4">
-                <p class="text-zinc-400 text-sm font-medium tracking-wide">
-                    &copy; 2026 Diretos reservados por <span class="text-zinc-800 font-bold">H-Lima Studio</span>
+                <div class="flex items-center justify-center gap-2 mb-4">
+                    <div class="w-2 h-2 bg-primary rounded-full"></div>
+                    <span class="font-black text-deep tracking-tight">DEVAE</span>
+                </div>
+                <p class="text-slate-400 text-sm font-medium tracking-wide">
+                    &copy; 2026 Diretos reservados por <span class="text-deep font-bold">H-Lima Studio</span>
                 </p>
             </div>
         </footer>
@@ -214,35 +135,26 @@
     <section id="view-profile" class="hidden-section container mx-auto py-10 px-4 fade-in">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="space-y-6">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border">
-                    <h2 class="text-xl font-black mb-4 flex items-center"><i data-lucide="user-cog"
-                            class="w-5 mr-2"></i> Meus Dados</h2>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <h2 class="text-lg font-bold mb-4 flex items-center text-deep"><i data-lucide="user-cog" class="w-5 mr-2 text-primary"></i> Meus Dados</h2>
                     <div class="space-y-3">
-                        <input id="prof-name" class="w-full p-2 border rounded bg-zinc-50 text-sm" placeholder="Nome">
-                        <input id="prof-phone" class="w-full p-2 border rounded bg-zinc-50 text-sm"
-                            placeholder="Telefone">
-                        <textarea id="prof-addr" rows="2" class="w-full p-2 border rounded bg-zinc-50 text-sm"
-                            placeholder="Endereço"></textarea>
-                        <button onclick="profile.updateInfo()"
-                            class="w-full bg-black text-white py-2 rounded-lg font-bold text-sm hover:bg-zinc-800">Salvar
-                            Dados</button>
+                        <input id="prof-name" class="w-full p-3 border rounded-xl bg-slate-50 text-sm" placeholder="Nome Completo">
+                        <input id="prof-phone" class="w-full p-3 border rounded-xl bg-slate-50 text-sm" placeholder="Telefone / WhatsApp">
+                        <textarea id="prof-addr" rows="3" class="w-full p-3 border rounded-xl bg-slate-50 text-sm" placeholder="Endereço / Dados da Empresa"></textarea>
+                        <button onclick="profile.updateInfo()" class="w-full bg-deep text-white py-3 rounded-xl font-bold text-sm hover:opacity-90">Salvar Dados</button>
                     </div>
                 </div>
-                <div class="bg-white p-6 rounded-2xl shadow-sm border">
-                    <h2 class="text-xl font-black mb-4 flex items-center"><i data-lucide="lock" class="w-5 mr-2"></i>
-                        Senha</h2>
-                    <input id="prof-newpass" type="password" placeholder="Nova Senha"
-                        class="w-full p-2 mb-2 border rounded bg-zinc-50 text-sm">
-                    <button onclick="profile.changePassword()"
-                        class="w-full bg-zinc-200 text-zinc-800 py-2 rounded-lg font-bold text-sm">Alterar</button>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <h2 class="text-lg font-bold mb-4 flex items-center text-deep"><i data-lucide="lock" class="w-5 mr-2 text-primary"></i> Segurança</h2>
+                    <input id="prof-newpass" type="password" placeholder="Nova Senha" class="w-full p-3 mb-3 border rounded-xl bg-slate-50 text-sm">
+                    <button onclick="profile.changePassword()" class="w-full bg-slate-200 text-slate-800 py-3 rounded-xl font-bold text-sm">Atualizar Senha</button>
                 </div>
-                <button onclick="auth.logout()"
-                    class="w-full py-3 text-red-500 font-bold hover:bg-red-50 rounded-lg">Sair da Conta</button>
+                <button onclick="auth.logout()" class="w-full py-3 text-red-500 font-bold hover:bg-red-50 rounded-xl transition">Sair da Conta</button>
             </div>
+            
             <div class="lg:col-span-2">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border min-h-[500px]">
-                    <h2 class="text-2xl font-black mb-6 flex items-center"><i data-lucide="package"
-                            class="w-6 mr-2"></i> Meus Pedidos</h2>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 min-h-[500px]">
+                    <h2 class="text-2xl font-black mb-6 flex items-center text-deep"><i data-lucide="briefcase" class="w-6 mr-2 text-primary"></i> Meus Projetos/Pedidos</h2>
                     <div id="profile-orders-list" class="space-y-4"></div>
                 </div>
             </div>
@@ -251,180 +163,189 @@
 
     <div id="modal-success" class="hidden-section swal-overlay">
         <div class="swal-modal">
-            <div
-                class="mx-auto w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6 text-green-600 animate-bounce">
-                <i data-lucide="check" class="w-10 h-10"></i></div>
-            <h2 class="text-3xl font-black mb-2 uppercase italic">Recebido!</h2>
-            <div class="bg-zinc-50 p-4 rounded-xl mb-6 border border-zinc-200">
-                <p class="text-xs text-zinc-500 uppercase font-bold">Número do Protocolo</p>
-                <p id="success-protocol" class="text-2xl font-black tracking-widest text-black">PED-00000</p>
+            <div class="mx-auto w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6 text-green-600 animate-bounce"><i data-lucide="check" class="w-10 h-10"></i></div>
+            <h2 class="text-3xl font-black mb-2 uppercase text-deep">Solicitação Enviada!</h2>
+            <div class="bg-slate-50 p-4 rounded-xl mb-6 border border-slate-200">
+                <p class="text-xs text-slate-500 uppercase font-bold">Número do Protocolo</p>
+                <p id="success-protocol" class="text-2xl font-black tracking-widest text-deep">DEV-00000</p>
             </div>
-            <p class="text-zinc-500 mb-6 text-sm">Acompanhe o status em "Minha Conta".</p>
-            <button onclick="location.reload()"
-                class="bg-black text-white px-6 py-3 rounded-xl font-bold w-full hover:bg-primary transition">Voltar à
-                Loja</button>
+            <p class="text-slate-500 mb-6 text-sm">Nossa equipe entrará em contato em breve para iniciar o processo.</p>
+            <button onclick="location.reload()" class="bg-primary text-white px-6 py-3 rounded-xl font-bold w-full hover:bg-primary-dark transition shadow-lg shadow-blue-500/30">Voltar</button>
         </div>
     </div>
 
     <section id="view-auth" class="hidden-section container mx-auto py-20 px-4 max-w-md fade-in">
-        <div class="bg-white p-8 rounded-[2rem] shadow-2xl border">
-            <div class="text-center mb-6">
-                <h2 id="auth-title" class="text-3xl font-black italic">LOGIN</h2>
+        <div class="bg-white p-8 rounded-[2rem] shadow-2xl border border-slate-100">
+            <div class="text-center mb-8">
+                <div class="w-10 h-10 bg-deep rounded-full mx-auto mb-4 flex items-center justify-center"><div class="w-3 h-3 bg-primary rounded-full"></div></div>
+                <h2 id="auth-title" class="text-3xl font-black text-deep">LOGIN</h2>
+                <p class="text-slate-400 text-sm mt-1">Acesse sua conta Devae.</p>
             </div>
+            
             <form id="form-login" onsubmit="auth.login(event)" class="space-y-4">
-                <input id="log-email" placeholder="Email" class="w-full p-4 border rounded-xl bg-zinc-50">
-                <input id="log-pass" type="password" placeholder="Senha"
-                    class="w-full p-4 border rounded-xl bg-zinc-50">
-                <button type="submit"
-                    class="w-full bg-black text-white py-4 rounded-xl font-black hover:bg-primary transition">ENTRAR</button>
+                <input id="log-email" placeholder="Email" class="w-full p-4 border rounded-xl bg-slate-50 outline-none focus:border-primary transition">
+                <input id="log-pass" type="password" placeholder="Senha" class="w-full p-4 border rounded-xl bg-slate-50 outline-none focus:border-primary transition">
+                <button type="submit" class="w-full bg-deep text-white py-4 rounded-xl font-black hover:opacity-90 transition shadow-lg">ENTRAR</button>
                 <div class="flex justify-between text-xs mt-4 font-bold">
-                    <span onclick="auth.toggleMode('register')"
-                        class="text-primary cursor-pointer hover:underline">Criar conta</span>
-                    <span onclick="auth.toggleMode('recover')" class="text-zinc-400 cursor-pointer">Esqueci a
-                        senha</span>
+                    <span onclick="auth.toggleMode('register')" class="text-primary cursor-pointer hover:underline">Criar conta</span>
+                    <span onclick="auth.toggleMode('recover')" class="text-slate-400 cursor-pointer">Esqueci a senha</span>
                 </div>
             </form>
+
             <form id="form-register" onsubmit="auth.register(event)" class="space-y-3 hidden-section">
-                <input id="reg-name" placeholder="Nome" required class="w-full p-3 border rounded-xl bg-zinc-50">
-                <input id="reg-cpf" placeholder="CPF" required class="w-full p-3 border rounded-xl bg-zinc-50">
-                <input id="reg-email" placeholder="Email" type="email" required
-                    class="w-full p-3 border rounded-xl bg-zinc-50">
-                <input id="reg-phone" placeholder="WhatsApp" required class="w-full p-3 border rounded-xl bg-zinc-50">
-                <input id="reg-addr" placeholder="Endereço" required class="w-full p-3 border rounded-xl bg-zinc-50">
-                <div class="grid grid-cols-2 gap-2"><input id="reg-pass" type="password" placeholder="Senha" required
-                        class="w-full p-3 border rounded-xl bg-zinc-50"><input id="reg-conf" type="password"
-                        placeholder="Confirmar" required class="w-full p-3 border rounded-xl bg-zinc-50"></div>
-                <button type="submit" class="w-full bg-primary text-white py-4 rounded-xl font-black">CADASTRAR</button>
-                <button type="button" onclick="auth.toggleMode('login')"
-                    class="w-full text-zinc-400 text-xs py-2 font-bold">Voltar</button>
+                <input id="reg-name" placeholder="Nome Completo / Empresa" required class="w-full p-3 border rounded-xl bg-slate-50 outline-none focus:border-primary">
+                <input id="reg-cpf" placeholder="CPF/CNPJ" required class="w-full p-3 border rounded-xl bg-slate-50 outline-none focus:border-primary">
+                <input id="reg-email" placeholder="Email Comercial" type="email" required class="w-full p-3 border rounded-xl bg-slate-50 outline-none focus:border-primary">
+                <input id="reg-phone" placeholder="WhatsApp" required class="w-full p-3 border rounded-xl bg-slate-50 outline-none focus:border-primary">
+                <input id="reg-addr" placeholder="Endereço / Cidade" required class="w-full p-3 border rounded-xl bg-slate-50 outline-none focus:border-primary">
+                <div class="grid grid-cols-2 gap-2">
+                    <input id="reg-pass" type="password" placeholder="Senha" required class="w-full p-3 border rounded-xl bg-slate-50 outline-none focus:border-primary">
+                    <input id="reg-conf" type="password" placeholder="Confirmar" required class="w-full p-3 border rounded-xl bg-slate-50 outline-none focus:border-primary">
+                </div>
+                <button type="submit" class="w-full bg-primary text-white py-4 rounded-xl font-black hover:opacity-90 shadow-lg shadow-blue-500/30">CADASTRAR</button>
+                <button type="button" onclick="auth.toggleMode('login')" class="w-full text-slate-400 text-xs py-2 font-bold hover:text-deep">Voltar</button>
             </form>
+            
             <form id="form-recover" onsubmit="auth.recover(event)" class="space-y-4 hidden-section">
-                <input id="rec-email" placeholder="Email" class="w-full p-4 border rounded-xl bg-zinc-50">
-                <input id="rec-cpf" placeholder="CPF" class="w-full p-4 border rounded-xl bg-zinc-50">
-                <input id="rec-newpass" type="password" placeholder="Nova Senha"
-                    class="w-full p-4 border rounded-xl bg-zinc-50">
+                <input id="rec-email" placeholder="Email cadastrado" class="w-full p-4 border rounded-xl bg-slate-50">
+                <input id="rec-cpf" placeholder="CPF/CNPJ cadastrado" class="w-full p-4 border rounded-xl bg-slate-50">
+                <input id="rec-newpass" type="password" placeholder="Nova Senha" class="w-full p-4 border rounded-xl bg-slate-50">
                 <button type="submit" class="w-full bg-primary text-white py-4 rounded-xl font-black">REDEFINIR</button>
-                <button type="button" onclick="auth.toggleMode('login')"
-                    class="w-full text-zinc-400 text-xs py-2 font-bold">Cancelar</button>
+                <button type="button" onclick="auth.toggleMode('login')" class="w-full text-slate-400 text-xs py-2 font-bold">Cancelar</button>
             </form>
         </div>
     </section>
 
-    <section id="view-admin-panel" class="hidden-section min-h-screen bg-zinc-100 flex flex-col md:flex-row">
-        <aside class="w-full md:w-64 bg-zinc-900 text-white flex-col h-screen sticky top-0 hidden md:flex">
-            <div class="p-6 border-b border-zinc-800">
-                <h2 class="text-xl font-black italic">DZ <span class="text-primary">ADMIN</span></h2>
+    <section id="view-admin-panel" class="hidden-section min-h-screen bg-slate-100 flex flex-col md:flex-row">
+        
+        <div class="md:hidden bg-deep text-white p-4 flex justify-between items-center sticky top-0 z-50 shadow-md">
+            <span class="font-black tracking-widest text-primary">DEVAE ADMIN</span>
+            <button onclick="admin.toggleMobileMenu()"><i data-lucide="menu" class="w-6 h-6"></i></button>
+        </div>
+
+        <aside id="admin-sidebar" class="fixed inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition duration-200 ease-in-out z-50 w-64 bg-deep text-white flex-col h-screen md:sticky md:top-0 shadow-2xl md:shadow-none flex">
+            <div class="p-6 border-b border-slate-800 flex justify-between items-center">
+                <h2 class="text-xl font-black tracking-tight">DEVAE <span class="text-primary">ADMIN</span></h2>
+                <button class="md:hidden" onclick="admin.toggleMobileMenu()"><i data-lucide="x" class="w-5 text-slate-400"></i></button>
             </div>
-            <div class="p-4 space-y-2">
-                <button onclick="admin.tab('products')"
-                    class="w-full text-left p-3 rounded hover:bg-zinc-800 text-sm font-bold flex"><i
-                        data-lucide="package" class="mr-2 w-4"></i> Produtos</button>
-                <button onclick="admin.tab('pending')"
-                    class="w-full text-left p-3 rounded hover:bg-zinc-800 text-sm font-bold flex"><i data-lucide="truck"
-                        class="mr-2 w-4"></i> Em Processo</button>
-                <button onclick="admin.tab('concluded')"
-                    class="w-full text-left p-3 rounded hover:bg-zinc-800 text-sm font-bold flex"><i
-                        data-lucide="check-circle" class="mr-2 w-4"></i> Histórico</button>
-                <button id="menu-users" onclick="admin.tab('users')"
-                    class="hidden-section w-full text-left p-3 rounded hover:bg-zinc-800 text-sm font-bold flex"><i
-                        data-lucide="users" class="mr-2 w-4"></i> Usuários</button>
+            
+            <div class="p-4 space-y-2 flex-grow overflow-y-auto">
+                <p class="text-[10px] text-slate-500 uppercase font-bold px-3 mt-2 mb-1">Serviços</p>
+                <button onclick="admin.tab('products')" class="w-full text-left p-3 rounded-lg hover:bg-slate-800 text-sm font-bold flex items-center text-slate-300 hover:text-white transition"><i data-lucide="layout-grid" class="mr-3 w-4 text-primary"></i> Catálogo</button>
+                
+                <p class="text-[10px] text-slate-500 uppercase font-bold px-3 mt-4 mb-1">Gestão</p>
+                <button onclick="admin.tab('pending')" class="w-full text-left p-3 rounded-lg hover:bg-slate-800 text-sm font-bold flex items-center text-slate-300 hover:text-white transition"><i data-lucide="activity" class="mr-3 w-4 text-primary"></i> Em Processo</button>
+                <button onclick="admin.tab('concluded')" class="w-full text-left p-3 rounded-lg hover:bg-slate-800 text-sm font-bold flex items-center text-slate-300 hover:text-white transition"><i data-lucide="archive" class="mr-3 w-4 text-primary"></i> Histórico</button>
+
+                <p class="text-[10px] text-slate-500 uppercase font-bold px-3 mt-4 mb-1">CRM</p>
+                <button onclick="admin.tab('customers')" class="w-full text-left p-3 rounded-lg hover:bg-slate-800 text-sm font-bold flex items-center text-slate-300 hover:text-white transition"><i data-lucide="users-round" class="mr-3 w-4 text-primary"></i> Clientes</button>
+                <button id="menu-users" onclick="admin.tab('users')" class="hidden-section w-full text-left p-3 rounded-lg hover:bg-slate-800 text-sm font-bold flex items-center text-slate-300 hover:text-white transition"><i data-lucide="shield" class="mr-3 w-4 text-primary"></i> Equipe</button>
             </div>
-            <div class="mt-auto p-4"><button onclick="location.href='/'"
-                    class="text-red-500 text-xs font-bold flex items-center"><i data-lucide="log-out"
-                        class="w-3 mr-1"></i> Sair</button></div>
+            
+            <div class="p-4 bg-slate-900 border-t border-slate-800">
+                <button onclick="admin.logout()" class="text-red-400 text-xs font-bold flex items-center hover:text-red-300 w-full"><i data-lucide="log-out" class="w-3 mr-2"></i> Sair do Painel</button>
+            </div>
         </aside>
 
-        <main class="flex-grow p-6 md:p-10 overflow-y-auto h-screen">
+        <div id="admin-overlay" onclick="admin.toggleMobileMenu()" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden"></div>
+
+        <main class="flex-grow p-4 md:p-10 overflow-y-auto h-[calc(100vh-60px)] md:h-screen">
+            
             <div id="tab-products" class="admin-tab">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-black">Produtos</h2>
-                    <input oninput="admin.filterAdminProducts(this.value)" placeholder="Filtrar..."
-                        class="p-2 border rounded text-sm w-64">
-                    <button onclick="document.getElementById('modal-add-prod').classList.remove('hidden-section')"
-                        class="bg-primary text-white px-4 py-2 rounded font-bold text-sm">+ Novo</button>
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <h2 class="text-2xl font-black text-deep">Catálogo de Soluções</h2>
+                    <div class="flex gap-2 w-full md:w-auto">
+                        <input oninput="admin.filterAdminProducts(this.value)" placeholder="Buscar serviço..." class="p-2 border rounded-lg text-sm w-full md:w-64 outline-none focus:border-primary">
+                        <button onclick="document.getElementById('modal-add-prod').classList.remove('hidden-section')" class="bg-deep text-white px-4 py-2 rounded-lg font-bold text-sm whitespace-nowrap">+ Novo</button>
+                    </div>
                 </div>
-                <div id="admin-prod-list" class="grid grid-cols-1 gap-4"></div>
+                <div id="admin-prod-list" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
             </div>
 
             <div id="tab-pending" class="admin-tab hidden-section">
-                <h2 class="text-2xl font-black mb-6">Workflow de Pedidos</h2>
-                <div class="grid grid-cols-3 gap-4 mb-6 text-sm text-center text-zinc-500 font-bold">
-                    <div class="bg-white p-2 rounded border border-blue-200 text-blue-600">1. Processando</div>
-                    <div class="bg-white p-2 rounded border border-purple-200 text-purple-600">2. Confirmado</div>
-                    <div class="bg-white p-2 rounded border border-yellow-200 text-yellow-600">3. Enviado</div>
+                <h2 class="text-2xl font-black mb-6 text-deep">Projetos em Andamento</h2>
+                <div class="grid grid-cols-3 gap-2 mb-6 text-[10px] md:text-xs text-center font-bold uppercase tracking-wide">
+                    <div class="bg-blue-50 p-2 rounded border border-blue-200 text-blue-600">1. Análise</div>
+                    <div class="bg-purple-50 p-2 rounded border border-purple-200 text-purple-600">2. Desenvolvimento</div>
+                    <div class="bg-yellow-50 p-2 rounded border border-yellow-200 text-yellow-600">3. Entrega/Homolog.</div>
                 </div>
                 <div id="list-pending" class="space-y-4"></div>
             </div>
 
             <div id="tab-concluded" class="admin-tab hidden-section">
-                <h2 class="text-2xl font-black mb-6">Histórico Concluído</h2>
+                <h2 class="text-2xl font-black mb-6 text-deep">Projetos Entregues</h2>
                 <div id="list-concluded" class="space-y-4 opacity-75"></div>
             </div>
 
-            <div id="tab-users" class="admin-tab hidden-section">
-                <h2 class="text-2xl font-black mb-6">Usuários</h2>
-                <button onclick="admin.openUserModal()"
-                    class="bg-zinc-800 text-white px-4 py-2 rounded text-sm font-bold mb-4">Novo</button>
-                <div class="bg-white rounded-lg shadow overflow-hidden">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-zinc-50 border-b">
-                            <tr>
-                                <th class="p-3">Nome</th>
-                                <th class="p-3">Login</th>
-                                <th class="p-3">Cargo</th>
-                                <th class="p-3 text-right">Ações</th>
-                            </tr>
+            <div id="tab-customers" class="admin-tab hidden-section">
+                <h2 class="text-2xl font-black mb-6 text-deep">Base de Clientes</h2>
+                <div class="bg-white rounded-xl shadow-sm border overflow-x-auto">
+                    <table class="w-full text-left text-sm min-w-[600px]">
+                        <thead class="bg-slate-50 border-b text-slate-500 uppercase text-xs">
+                            <tr><th class="p-4">Nome / Empresa</th><th class="p-4">Documento</th><th class="p-4">Contato</th><th class="p-4">Local</th></tr>
                         </thead>
-                        <tbody id="admin-user-list"></tbody>
+                        <tbody id="admin-customer-list" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="tab-users" class="admin-tab hidden-section">
+                <h2 class="text-2xl font-black mb-6 text-deep">Equipe Administrativa</h2>
+                <button onclick="admin.openUserModal()" class="bg-deep text-white px-4 py-2 rounded-lg text-sm font-bold mb-4">Adicionar Membro</button>
+                <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-50 border-b"><tr><th class="p-4">Nome</th><th class="p-4">Login</th><th class="p-4">Cargo</th><th class="p-4 text-right">Ações</th></tr></thead>
+                        <tbody id="admin-user-list" class="divide-y"></tbody>
                     </table>
                 </div>
             </div>
         </main>
     </section>
 
-    <div id="modal-add-prod"
-        class="hidden-section fixed inset-0 bg-black/60 z-[70] flex items-center justify-center p-4">
-        <div class="bg-white p-6 rounded-2xl w-full max-w-md">
-            <h3 class="font-black mb-4">Gerenciar Produto</h3>
-            <input id="np-name" placeholder="Nome" class="w-full mb-3 p-2 border rounded">
-            <input id="np-brand" placeholder="Marca" class="w-full mb-3 p-2 border rounded">
-            <input id="np-price" type="number" placeholder="Preço" class="w-full mb-3 p-2 border rounded">
-            <input id="np-file" type="file" class="w-full mb-4 text-sm">
-            <div class="flex gap-2"><button
-                    onclick="document.getElementById('modal-add-prod').classList.add('hidden-section')"
-                    class="flex-1 bg-zinc-100 py-2 rounded">Cancelar</button><button onclick="admin.saveProduct()"
-                    class="flex-1 bg-primary text-white py-2 rounded font-bold">Salvar</button></div>
+    <div id="modal-add-prod" class="hidden-section fixed inset-0 bg-deep/80 z-[70] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white p-6 rounded-2xl w-full max-w-md shadow-2xl">
+            <h3 class="font-black text-xl mb-4 text-deep">Novo Serviço/Produto</h3>
+            <input id="np-name" placeholder="Título do Serviço" class="w-full mb-3 p-3 border rounded-xl bg-slate-50 outline-none focus:border-primary">
+            <input id="np-brand" placeholder="Categoria (Ex: Web, App, Social)" class="w-full mb-3 p-3 border rounded-xl bg-slate-50 outline-none focus:border-primary">
+            <input id="np-price" type="number" placeholder="Valor Base (R$)" class="w-full mb-3 p-3 border rounded-xl bg-slate-50 outline-none focus:border-primary">
+            <label class="block mb-4">
+                <span class="text-xs font-bold text-slate-400 uppercase">Imagem Ilustrativa</span>
+                <input id="np-file" type="file" class="w-full mt-1 text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20">
+            </label>
+            <div class="flex gap-2">
+                <button onclick="document.getElementById('modal-add-prod').classList.add('hidden-section')" class="flex-1 bg-slate-100 py-3 rounded-xl font-bold text-slate-600 hover:bg-slate-200">Cancelar</button>
+                <button onclick="admin.saveProduct()" class="flex-1 bg-primary text-white py-3 rounded-xl font-bold hover:bg-primary-dark">Salvar</button>
+            </div>
         </div>
     </div>
 
-    <div id="modal-user" class="hidden-section fixed inset-0 bg-black/60 z-[70] flex items-center justify-center p-4">
-        <div class="bg-white p-6 rounded-2xl w-full max-w-md">
-            <h3 class="font-black mb-4">Dados do Usuário</h3>
-            <input type="hidden" id="u-id"><input id="u-name" placeholder="Nome"
-                class="w-full mb-3 p-2 border rounded"><input id="u-login" placeholder="Login"
-                class="w-full mb-3 p-2 border rounded"><input id="u-pass" type="password" placeholder="Nova Senha"
-                class="w-full mb-3 p-2 border rounded"><select id="u-role"
-                class="w-full mb-4 p-2 border rounded bg-white">
-                <option value="Visualizador">Visualizador</option>
-                <option value="Editor">Editor</option>
-                <option value="Admin">Administrador</option>
-            </select>
-            <div class="flex gap-2"><button
-                    onclick="document.getElementById('modal-user').classList.add('hidden-section')"
-                    class="flex-1 bg-zinc-100 py-2 rounded">Cancelar</button><button onclick="admin.saveUser()"
-                    class="flex-1 bg-primary text-white py-2 rounded font-bold">Salvar</button></div>
+    <div id="modal-user" class="hidden-section fixed inset-0 bg-deep/80 z-[70] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white p-6 rounded-2xl w-full max-w-md shadow-2xl">
+            <h3 class="font-black text-xl mb-4 text-deep">Dados do Membro</h3>
+            <input type="hidden" id="u-id">
+            <input id="u-name" placeholder="Nome" class="w-full mb-3 p-3 border rounded-xl bg-slate-50 outline-none focus:border-primary">
+            <input id="u-login" placeholder="Login" class="w-full mb-3 p-3 border rounded-xl bg-slate-50 outline-none focus:border-primary">
+            <input id="u-pass" type="password" placeholder="Senha" class="w-full mb-3 p-3 border rounded-xl bg-slate-50 outline-none focus:border-primary">
+            <select id="u-role" class="w-full mb-4 p-3 border rounded-xl bg-slate-50 outline-none"><option value="Visualizador">Visualizador</option><option value="Editor">Editor</option><option value="Admin">Administrador Total</option></select>
+            <div class="flex gap-2">
+                <button onclick="document.getElementById('modal-user').classList.add('hidden-section')" class="flex-1 bg-slate-100 py-3 rounded-xl font-bold text-slate-600">Cancelar</button>
+                <button onclick="admin.saveUser()" class="flex-1 bg-primary text-white py-3 rounded-xl font-bold">Salvar</button>
+            </div>
         </div>
     </div>
 
-    <section id="view-admin-login"
-        class="hidden-section w-full h-screen fixed inset-0 bg-zinc-900 flex items-center justify-center z-[80]">
-        <div class="bg-white p-8 rounded-xl w-full max-w-sm text-center">
-            <h2 class="text-2xl font-black mb-4">ADMIN ACCESS</h2>
-            <form onsubmit="admin.login(event)"><input id="adm-user" placeholder="User"
-                    class="w-full p-3 mb-2 border rounded"><input id="adm-pass" type="password" placeholder="Pass"
-                    class="w-full p-3 mb-4 border rounded"><button
-                    class="w-full bg-black text-white py-3 rounded font-bold">Entrar</button></form>
-            <button onclick="location.href='/'" class="mt-4 text-xs text-zinc-400">Voltar</button>
+    <section id="view-admin-login" class="hidden-section w-full h-screen fixed inset-0 bg-deep flex items-center justify-center z-[80]">
+        <div class="bg-white p-8 rounded-2xl w-full max-w-sm text-center shadow-2xl">
+            <div class="mb-6">
+                <h2 class="text-3xl font-black text-deep">DEVAE <span class="text-primary">ADMIN</span></h2>
+                <p class="text-xs text-slate-400 font-bold tracking-widest uppercase mt-1">Acesso Restrito</p>
+            </div>
+            <form onsubmit="admin.login(event)" class="space-y-3">
+                <input id="adm-user" placeholder="Usuário" class="w-full p-3 border rounded-xl bg-slate-50 text-center outline-none focus:border-primary">
+                <input id="adm-pass" type="password" placeholder="Senha" class="w-full p-3 border rounded-xl bg-slate-50 text-center outline-none focus:border-primary">
+                <button class="w-full bg-deep text-white py-3 rounded-xl font-bold hover:bg-slate-900 transition shadow-lg">ACESSAR PAINEL</button>
+            </form>
+            <button onclick="location.href='/'" class="mt-6 text-xs text-slate-400 font-bold hover:text-deep">Voltar à Home</button>
         </div>
     </section>
 
@@ -433,30 +354,52 @@
         let cart = [];
         let products = [];
         let currentCustomer = JSON.parse(localStorage.getItem('dz_customer')) || null;
-        let adminUser = null;
+        let adminUser = JSON.parse(localStorage.getItem('devae_admin')) || null; // RECUPERA SESSÃO ADMIN
 
         // --- APP CLIENTE ---
         const app = {
             init: async () => {
                 lucide.createIcons();
-                app.checkHash();
+                app.checkHash(); // Verifica se está na rota admin
                 app.updateUserHeader();
                 await app.fetchProducts();
                 window.onhashchange = app.checkHash;
             },
             updateUserHeader: () => document.getElementById('nav-user-name').innerText = currentCustomer ? currentCustomer.full_name.split(' ')[0] : 'Visitante',
-            checkHash: () => { window.location.hash === '#admin' ? app.view('admin-login') : app.view('shop'); },
-            fetchProducts: async () => { const { data } = await db.from('products').select('*').order('id', { ascending: false }); products = data || []; app.renderShop(products); },
+            
+            checkHash: () => { 
+                if (window.location.hash === '#admin') {
+                    // SE JÁ TIVER ADMIN LOGADO, VAI DIRETO PRO PAINEL
+                    if (adminUser) {
+                        app.view('admin-panel');
+                        if(adminUser.role === 'Admin') document.getElementById('menu-users').classList.remove('hidden-section');
+                        admin.tab('products');
+                    } else {
+                        app.view('admin-login'); 
+                    }
+                } else {
+                    app.view('shop'); 
+                }
+            },
+            
+            fetchProducts: async () => { const { data } = await db.from('products').select('*').order('id', {ascending: false}); products = data || []; app.renderShop(products); },
             renderShop: (list) => {
                 const grid = document.getElementById('product-grid');
                 grid.innerHTML = list.length ? list.map(p => `
-                    <div class="bg-white p-4 rounded-3xl border border-zinc-100 shadow-sm hover:shadow-xl transition group">
-                        <div class="h-48 bg-zinc-50 rounded-2xl flex items-center justify-center mb-4"><img src="${p.img}" class="h-full object-contain p-2 group-hover:scale-110 transition"></div>
-                        <span class="text-[10px] font-black text-primary uppercase">${p.brand}</span>
-                        <h3 class="font-bold text-sm mb-2">${p.name}</h3>
-                        <div class="flex justify-between items-center"><span class="font-black text-lg">R$ ${p.price}</span><button onclick="app.addToCart(${p.id})" class="bg-black text-white p-2 rounded-lg hover:bg-primary transition"><i data-lucide="plus" class="w-4 h-4"></i></button></div>
+                    <div class="bg-white p-4 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-1 transition duration-300 group">
+                        <div class="h-48 bg-slate-50 rounded-[1.5rem] flex items-center justify-center mb-4 relative overflow-hidden">
+                            <img src="${p.img}" class="h-full object-contain p-4 group-hover:scale-105 transition duration-500">
+                        </div>
+                        <div class="px-2">
+                            <span class="text-[10px] font-black text-primary uppercase tracking-wider">${p.brand}</span>
+                            <h3 class="font-bold text-deep text-base mb-1 truncate">${p.name}</h3>
+                            <div class="flex justify-between items-center mt-3">
+                                <span class="font-black text-lg text-deep">R$ ${p.price}</span>
+                                <button onclick="app.addToCart(${p.id})" class="bg-deep text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-primary transition shadow-lg shadow-blue-500/20"><i data-lucide="plus" class="w-4 h-4"></i></button>
+                            </div>
+                        </div>
                     </div>
-                `).join('') : '<p class="text-center text-zinc-400 col-span-4">Sem produtos.</p>';
+                `).join('') : '<p class="text-center text-slate-400 col-span-4 py-10">Nenhum serviço disponível no momento.</p>';
                 lucide.createIcons();
             },
             filterProducts: () => { const t = (document.getElementById('shop-search').value || document.getElementById('shop-search-mobile').value).toLowerCase(); app.renderShop(products.filter(p => p.name.toLowerCase().includes(t) || p.brand.toLowerCase().includes(t))); },
@@ -464,16 +407,22 @@
             removeFromCart: (idx) => { cart.splice(idx, 1); app.updateCart(); },
             updateCart: () => {
                 document.getElementById('cart-count').innerText = cart.length;
-                document.getElementById('cart-total').innerText = `R$ ${cart.reduce((a, b) => a + b.price, 0).toFixed(2)}`;
-                document.getElementById('cart-list').innerHTML = cart.map((i, idx) => `<div class="flex items-center gap-4 bg-zinc-50 p-2 rounded-lg border"><img src="${i.img}" class="w-10 h-10 object-contain bg-white rounded-lg"><div class="flex-1"><p class="font-bold text-xs">${i.name}</p><p class="text-primary text-xs font-bold">R$ ${i.price}</p></div><button onclick="app.removeFromCart(${idx})" class="text-red-500"><i data-lucide="trash-2" class="w-4"></i></button></div>`).join('');
+                document.getElementById('cart-total').innerText = `R$ ${cart.reduce((a,b)=>a+b.price,0).toFixed(2)}`;
+                document.getElementById('cart-list').innerHTML = cart.map((i,idx) => `
+                    <div class="flex items-center gap-4 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                        <img src="${i.img}" class="w-12 h-12 object-contain bg-white rounded-lg border">
+                        <div class="flex-1"><p class="font-bold text-xs text-deep">${i.name}</p><p class="text-primary text-xs font-black">R$ ${i.price}</p></div>
+                        <button onclick="app.removeFromCart(${idx})" class="text-red-400 hover:text-red-600"><i data-lucide="trash-2" class="w-4"></i></button>
+                    </div>
+                `).join('');
                 lucide.createIcons();
             },
             toggleCart: (show) => document.getElementById('side-cart').classList.toggle('translate-x-full', !show),
-            verifyCheckout: () => { if (!cart.length) return alert("Carrinho vazio!"); currentCustomer ? app.processOrder() : (app.toggleCart(false), app.view('auth')); },
+            verifyCheckout: () => { if(!cart.length) return alert("Selecione pelo menos um serviço."); currentCustomer ? app.processOrder() : (app.toggleCart(false), app.view('auth')); },
             processOrder: async () => {
-                const protocol = 'PED-' + Date.now().toString().slice(-6) + Math.floor(Math.random() * 100);
-                const { error } = await db.from('orders').insert({ customer_id: currentCustomer.id, customer_name: currentCustomer.full_name, phone: currentCustomer.phone, address: currentCustomer.address, items: cart, total: cart.reduce((a, b) => a + b.price, 0), status: 'Processando', protocol: protocol });
-                if (error) alert("Erro: " + error.message);
+                const protocol = 'DEV-' + Date.now().toString().slice(-6) + Math.floor(Math.random() * 100);
+                const { error } = await db.from('orders').insert({ customer_id: currentCustomer.id, customer_name: currentCustomer.full_name, phone: currentCustomer.phone, address: currentCustomer.address, items: cart, total: cart.reduce((a,b)=>a+b.price,0), status: 'Processando', protocol: protocol });
+                if(error) alert("Erro: " + error.message);
                 else { cart = []; app.updateCart(); app.toggleCart(false); document.getElementById('success-protocol').innerText = protocol; document.getElementById('modal-success').classList.remove('hidden-section'); }
             },
             view: (id) => { document.querySelectorAll('section').forEach(s => s.classList.add('hidden-section')); document.getElementById(`view-${id}`).classList.remove('hidden-section'); document.getElementById('client-nav').classList.toggle('hidden-section', id.includes('admin')); }
@@ -483,9 +432,9 @@
         const auth = {
             handleUserClick: () => currentCustomer ? profile.load() : app.view('auth'),
             toggleMode: (m) => { ['login', 'register', 'recover'].forEach(x => document.getElementById(`form-${x}`).classList.add('hidden-section')); document.getElementById(`form-${m}`).classList.remove('hidden-section'); document.getElementById('auth-title').innerText = m === 'login' ? 'LOGIN' : (m === 'register' ? 'CRIAR' : 'RECUPERAR'); },
-            register: async (e) => { e.preventDefault(); if (document.getElementById('reg-pass').value !== document.getElementById('reg-conf').value) return alert("Senhas diferem"); const form = { full_name: document.getElementById('reg-name').value, cpf: document.getElementById('reg-cpf').value, email: document.getElementById('reg-email').value, phone: document.getElementById('reg-phone').value, address: document.getElementById('reg-addr').value, password: document.getElementById('reg-pass').value }; const { data, error } = await db.from('customers').insert(form).select().single(); if (error) alert("Erro: " + error.message); else auth.setSession(data); },
-            login: async (e) => { e.preventDefault(); const { data } = await db.from('customers').select('*').eq('email', document.getElementById('log-email').value).eq('password', document.getElementById('log-pass').value).single(); if (data) auth.setSession(data); else alert("Inválido"); },
-            recover: async (e) => { e.preventDefault(); const { data } = await db.from('customers').select('id').eq('email', document.getElementById('rec-email').value).eq('cpf', document.getElementById('rec-cpf').value).single(); if (data) { await db.from('customers').update({ password: document.getElementById('rec-newpass').value }).eq('id', data.id); alert("Sucesso!"); auth.toggleMode('login'); } else alert("Erro dados"); },
+            register: async (e) => { e.preventDefault(); if(document.getElementById('reg-pass').value !== document.getElementById('reg-conf').value) return alert("Senhas diferem"); const form = { full_name: document.getElementById('reg-name').value, cpf: document.getElementById('reg-cpf').value, email: document.getElementById('reg-email').value, phone: document.getElementById('reg-phone').value, address: document.getElementById('reg-addr').value, password: document.getElementById('reg-pass').value }; const { data, error } = await db.from('customers').insert(form).select().single(); if(error) alert("Erro: " + error.message); else auth.setSession(data); },
+            login: async (e) => { e.preventDefault(); const { data } = await db.from('customers').select('*').eq('email', document.getElementById('log-email').value).eq('password', document.getElementById('log-pass').value).single(); if(data) auth.setSession(data); else alert("Inválido"); },
+            recover: async (e) => { e.preventDefault(); const { data } = await db.from('customers').select('id').eq('email', document.getElementById('rec-email').value).eq('cpf', document.getElementById('rec-cpf').value).single(); if(data) { await db.from('customers').update({ password: document.getElementById('rec-newpass').value }).eq('id', data.id); alert("Sucesso!"); auth.toggleMode('login'); } else alert("Erro dados"); },
             setSession: (data) => { localStorage.setItem('dz_customer', JSON.stringify(data)); currentCustomer = data; app.updateUserHeader(); cart.length > 0 ? (app.view('shop'), app.toggleCart(true)) : app.view('shop'); },
             logout: () => { localStorage.removeItem('dz_customer'); currentCustomer = null; app.updateUserHeader(); app.view('shop'); }
         };
@@ -497,138 +446,156 @@
                 document.getElementById('prof-name').value = currentCustomer.full_name;
                 document.getElementById('prof-phone').value = currentCustomer.phone;
                 document.getElementById('prof-addr').value = currentCustomer.address;
-                const { data } = await db.from('orders').select('*').eq('customer_id', currentCustomer.id).order('created_at', { ascending: false });
-
+                const { data } = await db.from('orders').select('*').eq('customer_id', currentCustomer.id).order('created_at', {ascending: false});
+                
                 document.getElementById('profile-orders-list').innerHTML = data.length ? data.map(o => {
-                    let stColor = 'text-blue-600 bg-blue-100';
-                    if (o.status === 'Confirmado') stColor = 'text-purple-600 bg-purple-100';
-                    if (o.status === 'Enviado') stColor = 'text-yellow-600 bg-yellow-100';
-                    if (o.status === 'Concluido') stColor = 'text-green-600 bg-green-100';
-
+                    let stColor = 'text-blue-600 bg-blue-50 border-blue-100';
+                    if(o.status === 'Confirmado') stColor = 'text-purple-600 bg-purple-50 border-purple-100';
+                    if(o.status === 'Enviado') stColor = 'text-yellow-600 bg-yellow-50 border-yellow-100';
+                    if(o.status === 'Concluido') stColor = 'text-green-600 bg-green-50 border-green-100';
+                    
                     return `
-                    <div class="border rounded-xl p-4 mb-3 bg-zinc-50">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="font-bold text-sm text-zinc-500">${new Date(o.created_at).toLocaleDateString()}</span>
-                            <span class="text-xs font-bold px-2 py-1 rounded uppercase ${stColor}">${o.status}</span>
+                    <div class="border rounded-xl p-4 mb-3 bg-white hover:shadow-md transition">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="font-bold text-xs text-slate-400">${new Date(o.created_at).toLocaleDateString()}</span>
+                            <span class="text-[10px] font-black uppercase px-2 py-1 rounded border ${stColor}">${o.status}</span>
                         </div>
-                        <p class="font-black text-lg mb-1">R$ ${o.total}</p>
-                        <p class="text-xs text-zinc-400">Prot: ${o.protocol}</p>
-                        ${o.status === 'Enviado' || o.status === 'Concluido' ?
-                            `<div class="mt-3 bg-white p-2 rounded border text-sm font-mono flex justify-between items-center">
-                                <span>Rastreio: <b>${o.tracking_code || 'Aguarde'}</b></span>
-                                <a href="https://rastreamento.correios.com.br/app/index.php" target="_blank" class="text-primary font-bold text-xs underline">Rastrear</a>
-                            </div>` : ''}
+                        <p class="font-black text-lg text-deep">R$ ${o.total}</p>
+                        <p class="text-xs text-slate-400 mb-2">Prot: ${o.protocol}</p>
+                        ${o.status === 'Enviado' || o.status === 'Concluido' ? `<div class="mt-3 bg-slate-50 p-3 rounded-lg border text-sm flex justify-between items-center"><span>📦 <b>${o.tracking_code || '...'}</b></span><a href="#" class="text-primary font-bold text-xs">Acompanhar</a></div>` : ''}
                     </div>
-                `}).join('') : '<p class="text-center text-zinc-400 mt-10">Você ainda não tem pedidos.</p>';
+                `}).join('') : '<div class="text-center py-10"><p class="text-slate-400">Você ainda não tem projetos.</p></div>';
                 lucide.createIcons();
             },
-            updateInfo: async () => { const up = { full_name: document.getElementById('prof-name').value, phone: document.getElementById('prof-phone').value, address: document.getElementById('prof-addr').value }; await db.from('customers').update(up).eq('id', currentCustomer.id); currentCustomer = { ...currentCustomer, ...up }; localStorage.setItem('dz_customer', JSON.stringify(currentCustomer)); alert("Salvo!"); },
-            changePassword: async () => { const p = document.getElementById('prof-newpass').value; if (p) { await db.from('customers').update({ password: p }).eq('id', currentCustomer.id); alert("Senha alterada"); } }
+            updateInfo: async () => { const up = { full_name: document.getElementById('prof-name').value, phone: document.getElementById('prof-phone').value, address: document.getElementById('prof-addr').value }; await db.from('customers').update(up).eq('id', currentCustomer.id); currentCustomer = {...currentCustomer, ...up}; localStorage.setItem('dz_customer', JSON.stringify(currentCustomer)); alert("Dados Salvos!"); },
+            changePassword: async () => { const p = document.getElementById('prof-newpass').value; if(p) { await db.from('customers').update({ password: p }).eq('id', currentCustomer.id); alert("Senha alterada."); document.getElementById('prof-newpass').value = ''; } }
         };
 
         // --- ADMIN ---
         const admin = {
-            login: async (e) => { e.preventDefault(); const { data } = await db.from('users').select('*').eq('login', document.getElementById('adm-user').value).eq('password', document.getElementById('adm-pass').value).single(); if (data) { adminUser = data; app.view('admin-panel'); if (data.role === 'Admin') document.getElementById('menu-users').classList.remove('hidden-section'); admin.tab('products'); } else alert("Negado"); },
+            toggleMobileMenu: () => {
+                const sidebar = document.getElementById('admin-sidebar');
+                const overlay = document.getElementById('admin-overlay');
+                if (sidebar.classList.contains('-translate-x-full')) {
+                    sidebar.classList.remove('-translate-x-full');
+                    overlay.classList.remove('hidden');
+                } else {
+                    sidebar.classList.add('-translate-x-full');
+                    overlay.classList.add('hidden');
+                }
+            },
+
+            login: async (e) => { 
+                e.preventDefault(); 
+                const { data } = await db.from('users').select('*').eq('login', document.getElementById('adm-user').value).eq('password', document.getElementById('adm-pass').value).single(); 
+                if(data) { 
+                    adminUser = data; 
+                    localStorage.setItem('devae_admin', JSON.stringify(data)); // SALVA SESSÃO
+                    app.view('admin-panel'); 
+                    if(data.role === 'Admin') document.getElementById('menu-users').classList.remove('hidden-section'); 
+                    admin.tab('products'); 
+                } else alert("Acesso Negado"); 
+            },
+            
+            logout: () => {
+                localStorage.removeItem('devae_admin');
+                adminUser = null;
+                app.view('shop');
+            },
+            
             tab: async (t) => {
                 document.querySelectorAll('.admin-tab').forEach(x => x.classList.add('hidden-section'));
                 document.getElementById(`tab-${t}`).classList.remove('hidden-section');
-                if (t === 'products') app.fetchProducts().then(() => admin.renderAdminProducts(products));
-                if (t === 'pending') admin.fetchOrders('active'); // Busca os ativos (não concluidos)
-                if (t === 'concluded') admin.fetchOrders('done'); // Busca concluidos
-                if (t === 'users' && adminUser.role === 'Admin') admin.fetchUsers();
+                
+                // Fecha menu mobile
+                document.getElementById('admin-sidebar').classList.add('-translate-x-full');
+                document.getElementById('admin-overlay').classList.add('hidden');
+
+                if(t === 'products') app.fetchProducts().then(() => admin.renderAdminProducts(products));
+                if(t === 'pending') admin.fetchOrders('active');
+                if(t === 'concluded') admin.fetchOrders('done');
+                if(t === 'customers') admin.fetchCustomers(); 
+                if(t === 'users' && adminUser.role === 'Admin') admin.fetchUsers();
             },
-
-            // PRODUTOS
-            renderAdminProducts: (list) => { document.getElementById('admin-prod-list').innerHTML = list.map(p => `<div class="bg-white p-4 border rounded flex justify-between items-center"><div class="flex items-center gap-4"><img src="${p.img}" class="w-12 h-12 object-contain"><div><p class="font-bold text-sm">${p.name}</p><p class="text-xs text-zinc-500">${p.brand}</p></div></div><button onclick="admin.deleteProduct(${p.id})" class="text-red-500 text-xs font-bold">Excluir</button></div>`).join(''); },
+            
+            // PRODUTOS/SERVIÇOS
+            renderAdminProducts: (list) => { document.getElementById('admin-prod-list').innerHTML = list.map(p => `<div class="bg-white p-4 border border-slate-200 rounded-xl flex justify-between items-center shadow-sm"><div class="flex items-center gap-4"><img src="${p.img}" class="w-12 h-12 object-contain bg-slate-50 rounded p-1"><div><p class="font-bold text-sm text-deep">${p.name}</p><p class="text-xs text-slate-500">${p.brand} | R$ ${p.price}</p></div></div><button onclick="admin.deleteProduct(${p.id})" class="text-red-500 hover:bg-red-50 p-2 rounded transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`).join(''); lucide.createIcons(); },
             filterAdminProducts: (v) => admin.renderAdminProducts(products.filter(p => p.name.toLowerCase().includes(v.toLowerCase()))),
-            saveProduct: async () => { const file = document.getElementById('np-file').files[0]; const name = document.getElementById('np-name').value; if (!file || !name) return alert("Preencha tudo"); const fName = `${Date.now()}_${file.name}`; await db.storage.from('images').upload(fName, file); const { data: { publicUrl } } = db.storage.from('images').getPublicUrl(fName); await db.from('products').insert({ name, price: document.getElementById('np-price').value, brand: document.getElementById('np-brand').value, img: publicUrl }); document.getElementById('modal-add-prod').classList.add('hidden-section'); admin.tab('products'); },
-            deleteProduct: async (id) => { if (confirm("Apagar?")) { await db.from('products').delete().eq('id', id); admin.tab('products'); } },
+            saveProduct: async () => { const file = document.getElementById('np-file').files[0]; const name = document.getElementById('np-name').value; if(!file || !name) return alert("Preencha todos os campos"); const fName = `${Date.now()}_${file.name}`; await db.storage.from('images').upload(fName, file); const { data: { publicUrl } } = db.storage.from('images').getPublicUrl(fName); await db.from('products').insert({ name, price: document.getElementById('np-price').value, brand: document.getElementById('np-brand').value, img: publicUrl }); document.getElementById('modal-add-prod').classList.add('hidden-section'); admin.tab('products'); },
+            deleteProduct: async (id) => { if(confirm("Tem certeza que deseja apagar?")) { await db.from('products').delete().eq('id', id); admin.tab('products'); } },
 
-            // PEDIDOS WORKFLOW
+            // PEDIDOS & WORKFLOW
             fetchOrders: async (type) => {
-                let query = db.from('orders').select('*').order('created_at', { ascending: false });
-                if (type === 'done') query = query.eq('status', 'Concluido');
-                else query = query.neq('status', 'Concluido'); // Todos que NÃO são concluidos
-
+                let query = db.from('orders').select('*').order('created_at', {ascending: false});
+                if(type === 'done') query = query.eq('status', 'Concluido'); else query = query.neq('status', 'Concluido');
                 const { data } = await query;
                 const container = type === 'done' ? 'list-concluded' : 'list-pending';
-
+                
                 document.getElementById(container).innerHTML = data.map(o => {
-                    // Lógica dos Botões e Progresso
                     let actionBtn = '';
                     let steps = '';
-
-                    if (type !== 'done') {
-                        // Stepper UI
-                        const s1 = o.status === 'Processando' || o.status === 'Confirmado' || o.status === 'Enviado' ? 'step-active' : '';
-                        const s2 = o.status === 'Confirmado' || o.status === 'Enviado' ? 'step-active' : '';
+                    
+                    if(type !== 'done') {
+                        const s1 = ['Processando','Confirmado','Enviado'].includes(o.status) ? 'step-active' : '';
+                        const s2 = ['Confirmado','Enviado'].includes(o.status) ? 'step-active' : '';
                         const s3 = o.status === 'Enviado' ? 'step-active' : '';
-                        const l1 = o.status === 'Confirmado' || o.status === 'Enviado' ? 'step-line-active' : '';
+                        const l1 = ['Confirmado','Enviado'].includes(o.status) ? 'step-line-active' : '';
                         const l2 = o.status === 'Enviado' ? 'step-line-active' : '';
 
-                        steps = `
-                            <div class="flex items-center w-full max-w-xs mb-4">
-                                <div class="step-dot ${s1}"></div><div class="step-line ${l1}"></div>
-                                <div class="step-dot ${s2}"></div><div class="step-line ${l2}"></div>
-                                <div class="step-dot ${s3}"></div>
-                            </div>
-                        `;
+                        steps = `<div class="flex items-center w-full max-w-xs mb-4 mt-2"><div class="step-dot ${s1}"></div><div class="step-line ${l1}"></div><div class="step-dot ${s2}"></div><div class="step-line ${l2}"></div><div class="step-dot ${s3}"></div></div>`;
 
-                        // Botões de Ação baseados no Status
-                        if (o.status === 'Processando')
-                            actionBtn = `<button onclick="admin.advanceStatus(${o.id}, 'Confirmado')" class="w-full bg-blue-600 text-white py-2 rounded font-bold text-xs hover:bg-blue-700">Confirmar Pedido</button>`;
-                        else if (o.status === 'Confirmado')
-                            actionBtn = `<button onclick="admin.advanceStatus(${o.id}, 'Enviado')" class="w-full bg-purple-600 text-white py-2 rounded font-bold text-xs hover:bg-purple-700">Enviar (Inserir Rastreio)</button>`;
-                        else if (o.status === 'Enviado')
-                            actionBtn = `<button onclick="admin.advanceStatus(${o.id}, 'Concluido')" class="w-full bg-green-600 text-white py-2 rounded font-bold text-xs hover:bg-green-700">Finalizar / Entregue</button>`;
-                    } else {
-                        actionBtn = `<button onclick="admin.advanceStatus(${o.id}, 'Processando')" class="w-full bg-zinc-500 text-white py-2 rounded font-bold text-xs">Reabrir Pedido</button>`;
+                        if(o.status === 'Processando') actionBtn = `<button onclick="admin.advanceStatus(${o.id}, 'Confirmado')" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold text-xs hover:bg-blue-700 shadow-md shadow-blue-500/20">Aprovar Pedido/Projeto</button>`;
+                        else if(o.status === 'Confirmado') actionBtn = `<button onclick="admin.advanceStatus(${o.id}, 'Enviado')" class="w-full bg-purple-600 text-white py-3 rounded-lg font-bold text-xs hover:bg-purple-700 shadow-md shadow-purple-500/20">Iniciar Desenvolvimento / Entrega</button>`;
+                        else if(o.status === 'Enviado') actionBtn = `<button onclick="admin.advanceStatus(${o.id}, 'Concluido')" class="w-full bg-green-600 text-white py-3 rounded-lg font-bold text-xs hover:bg-green-700 shadow-md shadow-green-500/20">Finalizar Projeto</button>`;
                     }
 
                     return `
-                    <div class="bg-white p-4 border rounded shadow-sm relative overflow-hidden">
-                        <div class="flex justify-between items-start mb-2">
-                            <h4 class="font-black text-lg">${o.customer_name}</h4>
-                            <span class="bg-zinc-100 px-2 py-1 text-xs font-bold rounded">${o.status}</span>
+                    <div class="bg-white p-5 border border-slate-200 rounded-xl shadow-sm relative">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-3">
+                            <h4 class="font-black text-lg text-deep flex items-center gap-2"><i data-lucide="user" class="w-4 h-4 text-slate-400"></i> ${o.customer_name}</h4>
+                            <span class="bg-slate-100 px-3 py-1 text-xs font-bold rounded-full text-slate-600 mt-2 md:mt-0">${o.status}</span>
                         </div>
-                        <p class="text-xs text-zinc-500 mb-2">Prot: ${o.protocol} | 📞 ${o.phone}</p>
-                        ${o.tracking_code ? `<p class="text-xs font-mono bg-zinc-50 p-1 mb-2">📦 ${o.tracking_code}</p>` : ''}
                         
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-100 mb-4 text-sm">
+                            <p class="mb-1 text-slate-600"><span class="font-bold text-deep">Endereço/Obs:</span> ${o.address}</p>
+                            <p class="mb-1 text-slate-600"><span class="font-bold text-deep">Telefone:</span> ${o.phone}</p>
+                            <div class="flex justify-between items-center mt-2 pt-2 border-t border-slate-200">
+                                <span class="text-xs text-slate-400">ID: ${o.protocol}</span>
+                                <span class="font-black text-lg text-primary">Total: R$ ${o.total}</span>
+                            </div>
+                        </div>
+
+                        ${o.tracking_code ? `<p class="text-xs font-mono bg-yellow-50 text-yellow-800 p-2 rounded mb-3 border border-yellow-100 flex items-center"><i data-lucide="link" class="w-3 h-3 mr-2"></i> Link/Track: ${o.tracking_code}</p>` : ''}
                         ${steps}
                         ${actionBtn}
                     </div>
                 `}).join('');
+                lucide.createIcons();
             },
-
             advanceStatus: async (id, nextStatus) => {
                 let updates = { status: nextStatus };
-
-                // Se for enviar, pede rastreio
-                if (nextStatus === 'Enviado') {
-                    const track = prompt("Digite o Código de Rastreio:");
-                    if (!track) return; // Cancela se não digitar
-                    updates.tracking_code = track;
-                }
-
+                if(nextStatus === 'Enviado') { const track = prompt("Link de Acompanhamento ou Rastreio:"); if(!track) return; updates.tracking_code = track; }
                 await db.from('orders').update(updates).eq('id', id);
-
-                // Simulação de Email
-                alert(`[Simulação] Email enviado para o cliente informando status: ${nextStatus}`);
-
-                // Recarrega a aba
+                alert(`Status atualizado para: ${nextStatus}`);
                 admin.tab(nextStatus === 'Concluido' ? 'concluded' : 'pending');
             },
 
-            // USUARIOS (Mantido igual)
-            fetchUsers: async () => { const { data } = await db.from('users').select('*').order('id'); document.getElementById('admin-user-list').innerHTML = data.map(u => `<tr class="border-b"><td class="p-3 font-bold">${u.name}</td><td class="p-3">${u.login}</td><td class="p-3 text-xs uppercase font-bold">${u.role}</td><td class="p-3 text-right"><button onclick="admin.editUser(${u.id}, '${u.name}', '${u.login}', '${u.role}')" class="text-blue-500 mr-2"><i data-lucide="edit" class="w-4"></i></button>${u.login !== 'admin' ? `<button onclick="admin.deleteUser(${u.id})" class="text-red-500"><i data-lucide="trash-2" class="w-4"></i></button>` : ''}</td></tr>`).join(''); lucide.createIcons(); },
+            fetchCustomers: async () => {
+                const { data } = await db.from('customers').select('*').order('created_at', {ascending: false});
+                const list = document.getElementById('admin-customer-list');
+                if(!data || data.length === 0) { list.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-slate-400">Base vazia.</td></tr>'; return; }
+                list.innerHTML = data.map(c => `<tr class="hover:bg-slate-50 transition"><td class="p-4 font-bold text-deep">${c.full_name}<div class="text-[10px] text-slate-400 font-normal">Desde: ${new Date(c.created_at).toLocaleDateString()}</div></td><td class="p-4 text-slate-600 font-mono text-xs">${c.cpf}</td><td class="p-4"><div class="text-xs font-bold text-deep">${c.email}</div><div class="text-xs text-slate-500">${c.phone}</div></td><td class="p-4 text-xs text-slate-500 max-w-[200px] truncate" title="${c.address}">${c.address}</td></tr>`).join('');
+            },
+
+            // USUARIOS ADMIN
+            fetchUsers: async () => { const { data } = await db.from('users').select('*').order('id'); document.getElementById('admin-user-list').innerHTML = data.map(u => `<tr class="hover:bg-slate-50"><td class="p-4 font-bold text-deep">${u.name}</td><td class="p-4 text-slate-600">${u.login}</td><td class="p-4"><span class="bg-slate-200 text-slate-700 px-2 py-1 rounded text-[10px] font-bold uppercase">${u.role}</span></td><td class="p-4 text-right"><button onclick="admin.editUser(${u.id}, '${u.name}', '${u.login}', '${u.role}')" class="text-blue-500 mr-3 hover:text-blue-700"><i data-lucide="edit" class="w-4"></i></button>${u.login !== 'admin' ? `<button onclick="admin.deleteUser(${u.id})" class="text-red-400 hover:text-red-600"><i data-lucide="trash-2" class="w-4"></i></button>` : ''}</td></tr>`).join(''); lucide.createIcons(); },
             openUserModal: () => { document.getElementById('u-id').value = ''; document.getElementById('modal-user').classList.remove('hidden-section'); },
             editUser: (id, n, l, r) => { document.getElementById('u-id').value = id; document.getElementById('u-name').value = n; document.getElementById('u-login').value = l; document.getElementById('u-role').value = r; document.getElementById('u-pass').value = ''; document.getElementById('modal-user').classList.remove('hidden-section'); },
-            saveUser: async () => { const id = document.getElementById('u-id').value; const form = { name: document.getElementById('u-name').value, login: document.getElementById('u-login').value, role: document.getElementById('u-role').value }; const p = document.getElementById('u-pass').value; if (p) form.password = p; if (id) await db.from('users').update(form).eq('id', id); else { if (!p) return alert("Senha?"); await db.from('users').insert(form); } document.getElementById('modal-user').classList.add('hidden-section'); admin.fetchUsers(); },
-            deleteUser: async (id) => { if (confirm("Apagar?")) { await db.from('users').delete().eq('id', id); admin.fetchUsers(); } }
+            saveUser: async () => { const id = document.getElementById('u-id').value; const form = { name: document.getElementById('u-name').value, login: document.getElementById('u-login').value, role: document.getElementById('u-role').value }; const p = document.getElementById('u-pass').value; if(p) form.password = p; if(id) await db.from('users').update(form).eq('id', id); else { if(!p) return alert("Senha obrigatória"); await db.from('users').insert(form); } document.getElementById('modal-user').classList.add('hidden-section'); admin.fetchUsers(); },
+            deleteUser: async (id) => { if(confirm("Remover membro da equipe?")) { await db.from('users').delete().eq('id', id); admin.fetchUsers(); } }
         };
 
         window.onload = app.init;
     </script>
 </body>
-
 </html>
